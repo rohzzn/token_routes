@@ -1,5 +1,8 @@
 // TokenSelector: Autocomplete input for SPL tokens using Jupiter Token API
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
+// Default generic token icon as fallback
+const DEFAULT_TOKEN_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjRDMTguNjI3NCAyNCAyNCAyNCAyNCAxN0MyNCAxMCAyNCA1LjM3MjU4IDE3IDVDMTAgNC42Mjc0MSA0IDEwIDQgMTdDNCAxNyA0IDI0IDEyIDI0WiIgZmlsbD0iI0NDRDJFOSIvPjxwYXRoIGQ9Ik0xMiAyNEMxOC42Mjc0IDI0IDE5IDE4LjYyNzQgMTkgMTJDMTkgNS4zNzI1OCAxOC42Mjc0IDAgMTIgMEM1LjM3MjU4IDAgNSA1LjM3MjU4IDUgMTJDNSAxOC42Mjc0IDUuMzcyNTggMjQgMTIgMjRaIiBmaWxsPSIjODg5RkIwIi8+PC9zdmc+";
 
 export type TokenInfo = {
   address: string;
@@ -16,51 +19,164 @@ type TokenSelectorProps = {
 
 const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
   const [tokens, setTokens] = useState<TokenInfo[]>([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
   const [query, setQuery] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const [filtered, setFiltered] = useState<TokenInfo[]>([]);
+  const [selected, setSelected] = useState<TokenInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetch("https://token.jup.ag/all")
-      .then((res) => res.json())
-      .then((data) => setTokens(data));
+    // Handle clicks outside of dropdown
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   useEffect(() => {
-    setFiltered(
-      tokens.filter(
-        (t) =>
-          t.symbol.toLowerCase().includes(query.toLowerCase()) ||
-          t.address.toLowerCase().includes(query.toLowerCase())
-      )
-    );
-  }, [query, tokens]);
+    setLoading(true);
+    fetch("https://token.jup.ag/all")
+      .then((res) => res.json())
+      .then((data) => {
+        setTokens(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error("Error fetching tokens:", err);
+        setLoading(false);
+      });
+      
+    // Load favorites from local storage
+    const savedFavorites = localStorage.getItem('tokenFavorites');
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (query.trim() === '') {
+      // Show favorites or popular tokens when no query
+      const favoritesTokens = tokens.filter(t => favorites.includes(t.address));
+      setFiltered(favoritesTokens.length > 0 ? favoritesTokens : tokens.slice(0, 5));
+    } else {
+      setFiltered(
+        tokens.filter(
+          (t) =>
+            t.symbol.toLowerCase().includes(query.toLowerCase()) ||
+            t.name.toLowerCase().includes(query.toLowerCase()) ||
+            t.address.toLowerCase() === query.toLowerCase()
+        ).slice(0, 10)
+      );
+    }
+  }, [query, tokens, favorites]);
+
+  const toggleFavorite = (address: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const newFavorites = favorites.includes(address)
+      ? favorites.filter(f => f !== address)
+      : [...favorites, address];
+    setFavorites(newFavorites);
+    localStorage.setItem('tokenFavorites', JSON.stringify(newFavorites));
+  };
+
+  const handleSelect = (token: TokenInfo) => {
+    setSelected(token);
+    setQuery(token.symbol);
+    setIsOpen(false);
+    onSelect(token);
+  };
+
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    e.currentTarget.src = DEFAULT_TOKEN_ICON;
+  };
 
   return (
-    <div className="w-full max-w-md mx-auto my-4">
-      <label className="block mb-1 font-semibold">{label}</label>
-      <input
-        type="text"
-        placeholder="Search token by symbol or mint address"
-        className="input input-bordered w-full mb-2"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-      />
-      <ul className="bg-white dark:bg-gray-800 border rounded max-h-48 overflow-y-auto">
-        {filtered.slice(0, 10).map((token) => (
-          <li
-            key={token.address}
-            className="flex items-center gap-2 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-            onClick={() => {
-              setQuery(token.symbol);
-              onSelect(token);
-            }}
-          >
-            <img src={token.logoURI} alt={token.symbol} className="w-5 h-5 rounded-full" />
-            <span className="font-semibold">{token.symbol}</span>
-            <span className="text-xs text-gray-400">{token.name}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="dropdown-container w-full" style={{ zIndex: isOpen ? 'var(--z-dropdown)' : 'var(--z-base)' }} ref={dropdownRef}>
+      <label className="block mb-2 text-sm font-medium">{label}</label>
+      <div 
+        className="flex items-center gap-2 p-2 border border-slate-700 rounded-lg bg-slate-800/50 dark:bg-slate-800/50 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {selected ? (
+          <>
+            <img 
+              src={selected.logoURI} 
+              alt={selected.symbol} 
+              className="w-6 h-6 rounded-full"
+              onError={handleImageError}
+            />
+            <div>
+              <div className="font-medium">{selected.symbol}</div>
+              <div className="text-xs text-slate-400">{selected.name}</div>
+            </div>
+          </>
+        ) : (
+          <div className="text-slate-400">Select a token</div>
+        )}
+      </div>
+      
+      {isOpen && <div className="dropdown-backdrop" onClick={() => setIsOpen(false)}></div>}
+      
+      {isOpen && (
+        <div className="dropdown-menu mt-1" onClick={(e) => e.stopPropagation()}>
+          <div className="p-2">
+            <input
+              type="text"
+              placeholder="Search by name or address"
+              className="w-full p-2 bg-slate-700 border border-slate-600 rounded text-white"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+            />
+          </div>
+          
+          {loading && (
+            <div className="text-center py-4 text-slate-400">Loading tokens...</div>
+          )}
+          
+          {!loading && filtered.length === 0 && (
+            <div className="text-center py-4 text-slate-400">No tokens found</div>
+          )}
+          
+          <ul>
+            {filtered.map((token) => (
+              <li
+                key={token.address}
+                className="flex items-center justify-between p-2 hover:bg-slate-700 cursor-pointer"
+                onClick={() => handleSelect(token)}
+              >
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={token.logoURI} 
+                    alt={token.symbol} 
+                    className="w-6 h-6 rounded-full"
+                    onError={handleImageError}
+                  />
+                  <div>
+                    <div className="font-medium">{token.symbol}</div>
+                    <div className="text-xs text-slate-400">{token.name}</div>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={(e) => toggleFavorite(token.address, e)}
+                  className="p-1 text-slate-400 hover:text-yellow-400"
+                >
+                  {favorites.includes(token.address) ? '★' : '☆'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
