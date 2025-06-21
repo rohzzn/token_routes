@@ -90,3 +90,74 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ---
 
 Built with ❤️ for the Jupiter Ecosystem during Namaste Jupiverse - Hackathon Edition.
+
+# Jupiter Route Visualizer with MCP Implementation
+
+This application provides a comprehensive visualization of Jupiter swap routes on Solana, along with a Machine Context Prompt (MCP) implementation for Jupiter APIs.
+
+## Features
+
+### Route Visualization
+- Interactive visualization of Jupiter swap routes
+- Detailed route analytics and metrics
+- Support for multiple routing strategies
+- Price impact and slippage analysis
+
+### Machine Context Prompt (MCP) Implementation
+The application includes a comprehensive MCP for Jupiter APIs that can be imported into AI tools like Claude via Cursor. The MCP provides:
+
+- Detailed documentation of Jupiter API endpoints, parameters, and responses
+- Common usage patterns and workflows
+- Best practices for error handling and transaction submission
+- Troubleshooting guides for common errors
+
+## MCP Structure
+
+The MCP is implemented as a JSON schema file located at `src/jupiter-mcp/jupiter-api-schema.json`. It covers:
+
+1. **Swap API** - Endpoints for getting quotes, building swap transactions, and executing swaps
+2. **Token API** - Information about tokens, verification status, and market data
+3. **Shield API** - Token safety information and warnings
+4. **Price API** - Token price information
+
+## How to Use the MCP
+
+1. Download the MCP schema from the application's MCP tab
+2. Import it into Claude AI via Cursor or other compatible tools
+3. The AI will now have enhanced knowledge about Jupiter's APIs
+4. Ask questions or request code samples related to Jupiter integration
+
+Example queries you can ask Claude after importing the MCP:
+- "How do I get a quote for swapping SOL to USDC using Jupiter's API?"
+- "What are the best practices for handling slippage in Jupiter swaps?"
+- "Show me a complete code example for executing a swap with Jupiter"
+- "How can I check if a token is safe before trading it?"
+
+## Getting Started
+
+### Prerequisites
+- Node.js 16+
+- npm or yarn
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
+```
+
+The application will be available at http://localhost:3000.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

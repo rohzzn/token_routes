@@ -261,7 +261,11 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
       <div className="flex flex-col gap-2 mb-4">
         <div className="flex gap-2 mb-2">
           <button
-            className={`px-3 py-1 rounded text-sm ${showAllRoutes ? 'bg-indigo-600' : 'bg-slate-700'}`}
+            className={`px-3 py-1 rounded text-sm ${
+              showAllRoutes 
+                ? 'bg-indigo-600 text-white' 
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
+            }`}
             onClick={() => setShowAllRoutes(!showAllRoutes)}
           >
             {showAllRoutes ? 'Hide Routes' : 'Compare All Routes'}
@@ -274,7 +278,9 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
               <button
                 key={i}
                 className={`px-3 py-1 rounded text-sm ${
-                  selectedRouteIndex === i ? 'bg-indigo-600' : 'bg-slate-700'
+                  selectedRouteIndex === i 
+                    ? 'bg-indigo-600 text-white' 
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white'
                 }`}
                 onClick={() => setSelectedRouteIndex(i)}
               >
@@ -300,16 +306,13 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
     return (
       <div 
         key={`route-${index}`} 
-        className="p-4 rounded-lg mb-3" 
-        style={{ 
-          background: 'rgba(30, 41, 59, 0.4)',
-          borderLeft: `4px solid ${color}`
-        }}
+        className="p-4 rounded-lg mb-3 route-card bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700" 
+        style={{ borderLeft: `4px solid ${color}` }}
       >
         <div className="flex justify-between items-center mb-3">
           <div className="font-medium">Route {index + 1}</div>
           <div className={`text-sm ${
-            isPriceImpactHigh ? 'text-red-400' : 'text-green-400'
+            isPriceImpactHigh ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
           }`}>
             Price Impact: {priceImpact}%
           </div>
@@ -317,7 +320,7 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
         
         <div className="flex items-center gap-2 mb-4">
           {/* Input token */}
-          <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1 border border-gray-200 dark:border-gray-700">
             {inputToken && (
               <>
                 <div className="relative w-5 h-5 rounded-full overflow-hidden">
@@ -352,11 +355,11 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
               {route.routePlan.map((hop, hopIndex) => (
                 <React.Fragment key={`hop-${hopIndex}`}>
                   <div 
-                    className="bg-slate-800 rounded-lg py-1 px-2 mx-1 text-xs text-center"
+                    className="bg-gray-100 dark:bg-gray-800 rounded-lg py-1 px-2 mx-1 text-xs text-center border border-gray-200 dark:border-gray-700"
                     style={{ borderColor: color }}
                   >
                     {getProtocolFromLabel(hop.swapInfo.label)}
-                    <div className="text-xs text-slate-400">{hop.percent}%</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{hop.percent}%</div>
                   </div>
                   <div className="border-t-2 flex-1" style={{ borderColor: color }}></div>
                 </React.Fragment>
@@ -365,7 +368,7 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
           )}
           
           {/* Output token */}
-          <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1">
+          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg px-2 py-1 border border-gray-200 dark:border-gray-700">
             {outputToken && (
               <>
                 <div className="relative w-5 h-5 rounded-full overflow-hidden">
@@ -389,16 +392,16 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
         </div>
         
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-          <div className="text-slate-400">Input Amount:</div>
+          <div className="text-gray-500 dark:text-gray-400">Input Amount:</div>
           <div>{inputToken && formatTokenAmount(route.inAmount, inputToken.decimals)} {inputToken?.symbol}</div>
           
-          <div className="text-slate-400">Output Amount:</div>
+          <div className="text-gray-500 dark:text-gray-400">Output Amount:</div>
           <div>{outputToken && formatTokenAmount(route.outAmount, outputToken.decimals)} {outputToken?.symbol}</div>
           
-          <div className="text-slate-400">Slippage Tolerance:</div>
+          <div className="text-gray-500 dark:text-gray-400">Slippage Tolerance:</div>
           <div>{(route.slippageBps / 100).toFixed(2)}%</div>
           
-          <div className="text-slate-400">Number of Hops:</div>
+          <div className="text-gray-500 dark:text-gray-400">Number of Hops:</div>
           <div>{route.routePlan.length}</div>
         </div>
       </div>
@@ -406,18 +409,18 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
   };
 
   return (
-    <div className="w-full h-[500px] relative overflow-auto">
+    <div className="route-panel w-full h-[500px] relative overflow-auto bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
       {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-gray-900/50 z-10">
           <div className="flex flex-col items-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mb-3"></div>
-            <span className="text-slate-300">Finding optimal routes...</span>
+            <span className="text-gray-700 dark:text-gray-300">Finding optimal routes...</span>
           </div>
         </div>
       )}
 
       {!loading && routes.length > 0 && (
-        <div className="p-2">
+        <div className="p-4">
           {renderRouteSelector()}
           {routesToRender.map((route, index) => renderRoute(route, index))}
         </div>
@@ -426,8 +429,8 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
       {!loading && routes.length === 0 && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-xl font-medium text-slate-400 mb-2">No Routes Found</div>
-            <p className="text-slate-500 max-w-md">
+            <div className="text-xl font-medium text-gray-400 dark:text-gray-400 mb-2">No Routes Found</div>
+            <p className="text-gray-500 dark:text-gray-500 max-w-md">
               {inputToken && outputToken
                 ? `No routes available between ${inputToken.symbol} and ${outputToken.symbol}.`
                 : 'Select both tokens to find a route.'}

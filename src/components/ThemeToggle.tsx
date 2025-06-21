@@ -1,50 +1,90 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ThemeToggle = () => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
-
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
   // Initialize theme from localStorage or system preference
   useEffect(() => {
+    // Check for saved theme preference or use system preference
     const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     
-    if (savedTheme === 'light') {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove('dark');
-    } else if (savedTheme === 'dark' || prefersDark) {
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.classList.remove('dark');
     }
   }, []);
-
+  
+  // Update theme when toggled
   const toggleTheme = () => {
     if (isDarkMode) {
+      // Switch to light mode
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
     } else {
+      // Switch to dark mode
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
     }
-    setIsDarkMode(!isDarkMode);
   };
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-lg bg-opacity-20 hover:bg-opacity-30 transition-colors"
-      aria-label="Toggle dark mode"
+      className="inline-flex items-center justify-center h-8 w-14 rounded-full bg-gray-200 dark:bg-gray-700 relative focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {isDarkMode ? (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-yellow-300">
-          <path d="M12 2.25a.75.75 0 01.75.75v2.25a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM7.5 12a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM18.894 6.166a.75.75 0 00-1.06-1.06l-1.591 1.59a.75.75 0 101.06 1.061l1.591-1.59zM21.75 12a.75.75 0 01-.75.75h-2.25a.75.75 0 010-1.5H21a.75.75 0 01.75.75zM17.834 18.894a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 10-1.061 1.06l1.59 1.591zM12 18a.75.75 0 01.75.75V21a.75.75 0 01-1.5 0v-2.25A.75.75 0 0112 18zM7.758 17.303a.75.75 0 00-1.061-1.06l-1.591 1.59a.75.75 0 001.06 1.061l1.591-1.59zM6 12a.75.75 0 01-.75.75H3a.75.75 0 010-1.5h2.25A.75.75 0 016 12zM6.697 7.757a.75.75 0 001.06-1.06l-1.59-1.591a.75.75 0 00-1.061 1.06l1.59 1.591z" />
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-indigo-800">
-          <path fillRule="evenodd" d="M9.528 1.718a.75.75 0 01.162.819A8.97 8.97 0 009 6a9 9 0 009 9 8.97 8.97 0 003.463-.69.75.75 0 01.981.98 10.503 10.503 0 01-9.694 6.46c-5.799 0-10.5-4.701-10.5-10.5 0-4.368 2.667-8.112 6.46-9.694a.75.75 0 01.818.162z" clipRule="evenodd" />
-        </svg>
-      )}
+      <span className="sr-only">{isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}</span>
+      
+      {/* Toggle track */}
+      <span 
+        className={`absolute block w-6 h-6 rounded-full bg-white shadow transform transition-transform duration-200 ease-in-out ${
+          isDarkMode ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+      
+      {/* Sun icon (light mode) */}
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className={`absolute w-4 h-4 left-2 transition-opacity duration-200 ease-in-out ${
+          isDarkMode ? 'opacity-0' : 'opacity-100'
+        } text-yellow-500`} 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" 
+        />
+      </svg>
+      
+      {/* Moon icon (dark mode) */}
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        className={`absolute w-4 h-4 right-2 transition-opacity duration-200 ease-in-out ${
+          isDarkMode ? 'opacity-100' : 'opacity-0'
+        } text-indigo-200`} 
+        fill="none" 
+        viewBox="0 0 24 24" 
+        stroke="currentColor"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" 
+        />
+      </svg>
     </button>
   );
 };

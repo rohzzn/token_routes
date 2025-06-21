@@ -1,0 +1,471 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Jupiter API Machine Context Prompt",
+  "description": "A comprehensive schema for Jupiter APIs to be used as a Machine Context Prompt (MCP) for AI tools like Claude",
+  "version": "1.0.0",
+  "apis": {
+    "swap": {
+      "description": "Jupiter Swap API allows developers to access liquidity on Solana. It returns serialized transactions needed to execute swaps.",
+      "baseUrl": "https://quote-api.jup.ag/v6",
+      "endpoints": {
+        "quote": {
+          "method": "GET",
+          "path": "/quote",
+          "description": "Get the best priced quote for a swap between two tokens",
+          "parameters": {
+            "inputMint": {
+              "type": "string",
+              "description": "The mint address of the input token (e.g., So11111111111111111111111111111111111111112 for SOL)",
+              "required": true
+            },
+            "outputMint": {
+              "type": "string",
+              "description": "The mint address of the output token (e.g., EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v for USDC)",
+              "required": true
+            },
+            "amount": {
+              "type": "string",
+              "description": "The amount of input tokens to swap in raw units (e.g., lamports for SOL, where 1 SOL = 1,000,000,000 lamports)",
+              "required": true
+            },
+            "slippageBps": {
+              "type": "integer",
+              "description": "The maximum slippage tolerance in basis points (e.g., 50 for 0.5%)",
+              "default": 50
+            },
+            "onlyDirectRoutes": {
+              "type": "boolean",
+              "description": "If true, only direct routes between the input and output tokens will be considered",
+              "default": false
+            },
+            "restrictIntermediateTokens": {
+              "type": "boolean",
+              "description": "If true, only use highly liquid tokens as intermediate hops",
+              "default": true
+            },
+            "excludeDexes": {
+              "type": "string",
+              "description": "Comma-separated list of DEX names to exclude from routing"
+            },
+            "maxAccounts": {
+              "type": "integer",
+              "description": "Maximum number of accounts to include in the transaction (helpful for composability)"
+            },
+            "asLegacyTransaction": {
+              "type": "boolean",
+              "description": "If true, returns a legacy transaction instead of a versioned transaction",
+              "default": false
+            },
+            "platformFeeBps": {
+              "type": "integer",
+              "description": "Fee in basis points to be charged by the platform integrating Jupiter"
+            }
+          },
+          "response": {
+            "inputMint": "string",
+            "inAmount": "string",
+            "outputMint": "string",
+            "outAmount": "string",
+            "otherAmountThreshold": "string",
+            "swapMode": "string",
+            "slippageBps": "integer",
+            "platformFee": "object",
+            "priceImpactPct": "string",
+            "routePlan": "array",
+            "contextSlot": "integer",
+            "timeTaken": "number"
+          }
+        },
+        "swap": {
+          "method": "POST",
+          "path": "/swap",
+          "description": "Get a serialized transaction for the swap based on a quote",
+          "parameters": {
+            "quoteResponse": {
+              "type": "object",
+              "description": "The quote response object from the /quote endpoint",
+              "required": true
+            },
+            "userPublicKey": {
+              "type": "string",
+              "description": "The public key of the user performing the swap",
+              "required": true
+            },
+            "wrapAndUnwrapSol": {
+              "type": "boolean",
+              "description": "If true, automatically wrap and unwrap SOL as needed",
+              "default": true
+            },
+            "feeAccount": {
+              "type": "string",
+              "description": "The account to receive platform fees (if platformFeeBps was specified in the quote)"
+            },
+            "dynamicComputeUnitLimit": {
+              "type": "boolean",
+              "description": "If true, dynamically adjust compute unit limit based on transaction complexity",
+              "default": false
+            },
+            "prioritizationFeeLamports": {
+              "type": "object",
+              "description": "Custom priority fee settings for the transaction"
+            },
+            "dynamicSlippage": {
+              "type": "object",
+              "description": "Dynamic slippage settings for optimizing execution"
+            }
+          },
+          "response": {
+            "swapTransaction": "string",
+            "lastValidBlockHeight": "integer",
+            "prioritizationFeeLamports": "integer",
+            "computeUnitLimit": "integer",
+            "prioritizationType": "object",
+            "dynamicSlippageReport": "object",
+            "simulationError": "string"
+          }
+        },
+        "swap-instructions": {
+          "method": "POST",
+          "path": "/swap-instructions",
+          "description": "Get individual instructions for the swap instead of a complete transaction",
+          "parameters": {
+            "quoteResponse": {
+              "type": "object",
+              "description": "The quote response object from the /quote endpoint",
+              "required": true
+            },
+            "userPublicKey": {
+              "type": "string",
+              "description": "The public key of the user performing the swap",
+              "required": true
+            },
+            "useTokenLedger": {
+              "type": "boolean",
+              "description": "If true, use token ledger for dynamic input amounts",
+              "default": false
+            }
+          },
+          "response": {
+            "tokenLedgerInstruction": "object",
+            "computeBudgetInstructions": "array",
+            "setupInstructions": "array",
+            "swapInstruction": "object",
+            "cleanupInstruction": "object",
+            "addressLookupTableAddresses": "array"
+          }
+        },
+        "program-id-to-label": {
+          "method": "GET",
+          "path": "/program-id-to-label",
+          "description": "Get a mapping of program IDs to their corresponding DEX labels",
+          "response": {
+            "programId": "string"
+          }
+        }
+      }
+    },
+    "token": {
+      "description": "Jupiter Token API provides access to token information, verification status, and safety checks",
+      "baseUrl": "https://lite-api.jup.ag/tokens/v1",
+      "endpoints": {
+        "token": {
+          "method": "GET",
+          "path": "/token/{mint}",
+          "description": "Get detailed information about a specific token",
+          "parameters": {
+            "mint": {
+              "type": "string",
+              "description": "The mint address of the token",
+              "required": true
+            }
+          },
+          "response": {
+            "address": "string",
+            "name": "string",
+            "symbol": "string",
+            "decimals": "integer",
+            "logoURI": "string",
+            "tags": "array",
+            "daily_volume": "number",
+            "created_at": "string",
+            "freeze_authority": "string",
+            "mint_authority": "string",
+            "permanent_delegate": "string",
+            "minted_at": "string",
+            "extensions": "object"
+          }
+        },
+        "market": {
+          "method": "GET",
+          "path": "/market/{marketAddress}/mints",
+          "description": "Get token mints that belong to a specific market/pool",
+          "parameters": {
+            "marketAddress": {
+              "type": "string",
+              "description": "The address of the market/pool",
+              "required": true
+            }
+          },
+          "response": [
+            "string"
+          ]
+        },
+        "tradable": {
+          "method": "GET",
+          "path": "/mints/tradable",
+          "description": "Get all token mints that are tradable on Jupiter",
+          "response": [
+            "string"
+          ]
+        },
+        "tagged": {
+          "method": "GET",
+          "path": "/tagged/{tag}",
+          "description": "Get tokens with a specific tag",
+          "parameters": {
+            "tag": {
+              "type": "string",
+              "description": "Tag to filter tokens by (e.g., verified, lst, token-2022)",
+              "required": true
+            }
+          },
+          "response": [
+            {
+              "address": "string",
+              "name": "string",
+              "symbol": "string",
+              "decimals": "integer",
+              "logoURI": "string",
+              "tags": "array",
+              "daily_volume": "number",
+              "created_at": "string",
+              "freeze_authority": "string",
+              "mint_authority": "string",
+              "permanent_delegate": "string",
+              "minted_at": "string",
+              "extensions": "object"
+            }
+          ]
+        },
+        "new": {
+          "method": "GET",
+          "path": "/new",
+          "description": "Get new tokens sorted by creation timestamp",
+          "parameters": {
+            "limit": {
+              "type": "integer",
+              "description": "Number of tokens to return"
+            },
+            "offset": {
+              "type": "integer",
+              "description": "Number of tokens to skip"
+            }
+          },
+          "response": [
+            {
+              "mint": "string",
+              "created_at": "string",
+              "metadata_updated_at": "integer",
+              "name": "string",
+              "symbol": "string",
+              "decimals": "integer",
+              "logo_uri": "string",
+              "known_markets": "array",
+              "mint_authority": "string",
+              "freeze_authority": "string"
+            }
+          ]
+        },
+        "all": {
+          "method": "GET",
+          "path": "/all",
+          "description": "Get all tokens indexed by Jupiter (large response)",
+          "response": [
+            {
+              "address": "string",
+              "name": "string",
+              "symbol": "string",
+              "decimals": "integer",
+              "logoURI": "string",
+              "tags": "array",
+              "daily_volume": "number",
+              "created_at": "string",
+              "freeze_authority": "string",
+              "mint_authority": "string",
+              "permanent_delegate": "string",
+              "minted_at": "string",
+              "extensions": "object"
+            }
+          ]
+        }
+      }
+    },
+    "shield": {
+      "description": "Jupiter Shield API provides token safety information and warnings",
+      "baseUrl": "https://lite-api.jup.ag/ultra/v1",
+      "endpoints": {
+        "shield": {
+          "method": "GET",
+          "path": "/shield",
+          "description": "Get safety information and warnings for specified token mints",
+          "parameters": {
+            "mints": {
+              "type": "string",
+              "description": "Comma-separated list of token mint addresses",
+              "required": true
+            }
+          },
+          "response": {
+            "warnings": {
+              "mintAddress": [
+                {
+                  "type": "string",
+                  "message": "string",
+                  "severity": "string"
+                }
+              ]
+            }
+          },
+          "warningTypes": {
+            "NOT_VERIFIED": "Token is not verified by Jupiter",
+            "LOW_ORGANIC_ACTIVITY": "Token has low organic trading activity",
+            "NEW_LISTING": "Token is newly listed",
+            "HAS_FREEZE_AUTHORITY": "Token has a freeze authority that can prevent trading",
+            "HAS_MINT_AUTHORITY": "Token has a mint authority that can create new tokens",
+            "HAS_PERMANENT_DELEGATE": "Token has a permanent delegate authority",
+            "BLACKLISTED": "Token is blacklisted due to security concerns",
+            "HONEYPOT": "Token may be a honeypot scam"
+          }
+        }
+      }
+    },
+    "price": {
+      "description": "Jupiter Price API provides price information for tokens",
+      "baseUrl": "https://price.jup.ag/v6",
+      "endpoints": {
+        "price": {
+          "method": "GET",
+          "path": "/price",
+          "description": "Get price information for specified tokens",
+          "parameters": {
+            "ids": {
+              "type": "string",
+              "description": "Comma-separated list of token mint addresses",
+              "required": true
+            },
+            "vsToken": {
+              "type": "string",
+              "description": "Token to price against (default: USDC)",
+              "default": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+            }
+          },
+          "response": {
+            "data": {
+              "mintAddress": {
+                "id": "string",
+                "mintSymbol": "string",
+                "vsToken": "string",
+                "vsTokenSymbol": "string",
+                "price": "number"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "commonPatterns": {
+    "swapWorkflow": {
+      "description": "Standard workflow for executing a swap",
+      "steps": [
+        "1. Get a quote using the /quote endpoint with input/output tokens and amount",
+        "2. Obtain a serialized transaction using the /swap endpoint with the quote response",
+        "3. Deserialize, sign, and submit the transaction to the Solana blockchain"
+      ],
+      "example": {
+        "description": "Example of swapping SOL to USDC",
+        "quoteRequest": {
+          "inputMint": "So11111111111111111111111111111111111111112",
+          "outputMint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+          "amount": "100000000",
+          "slippageBps": 50
+        },
+        "swapRequest": {
+          "quoteResponse": "...",
+          "userPublicKey": "userPublicKeyString",
+          "wrapAndUnwrapSol": true
+        }
+      }
+    },
+    "tokenSafety": {
+      "description": "Pattern for checking token safety before trading",
+      "steps": [
+        "1. Get token information using the Token API",
+        "2. Check for verification status using the 'verified' tag",
+        "3. Get safety warnings using the Shield API",
+        "4. Analyze warnings and present to users before trading"
+      ]
+    }
+  },
+  "bestPractices": {
+    "errorHandling": {
+      "description": "Best practices for handling errors from Jupiter APIs",
+      "recommendations": [
+        "Always check for error responses and handle them gracefully",
+        "Implement retries with exponential backoff for transient errors",
+        "Parse error messages to provide meaningful feedback to users",
+        "Handle network congestion scenarios with appropriate retry strategies"
+      ]
+    },
+    "transactionSubmission": {
+      "description": "Best practices for submitting transactions to Solana",
+      "recommendations": [
+        "Use skipPreflight=true to avoid client-side simulation failures",
+        "Set appropriate priority fees for faster transaction confirmation",
+        "Implement proper error handling for transaction failures",
+        "Consider using dynamic compute unit limits for complex transactions"
+      ]
+    },
+    "userExperience": {
+      "description": "Best practices for user experience when integrating Jupiter",
+      "recommendations": [
+        "Always show token verification status to users",
+        "Display price impact and slippage information clearly",
+        "Provide transaction confirmation status and links to explorers",
+        "Implement proper loading states during API calls and transaction processing"
+      ]
+    }
+  },
+  "commonErrors": {
+    "quoteFailed": {
+      "description": "Failed to get a quote",
+      "possibleCauses": [
+        "Invalid token addresses",
+        "Insufficient liquidity",
+        "Amount too small or too large",
+        "Network congestion"
+      ],
+      "solutions": [
+        "Verify token addresses are correct",
+        "Try a smaller amount",
+        "Exclude problematic DEXes using excludeDexes parameter",
+        "Retry with exponential backoff"
+      ]
+    },
+    "transactionFailed": {
+      "description": "Transaction failed to execute",
+      "possibleCauses": [
+        "Slippage exceeded",
+        "Insufficient funds",
+        "Price changed during execution",
+        "DEX-specific errors"
+      ],
+      "solutions": [
+        "Increase slippage tolerance",
+        "Ensure sufficient funds for the swap and fees",
+        "Implement retry mechanism with fresh quotes",
+        "Use Shield API to avoid problematic tokens"
+      ]
+    }
+  }
+} 

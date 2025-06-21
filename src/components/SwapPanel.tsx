@@ -29,14 +29,15 @@ interface QuoteResponse {
 
 const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
   const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
-  const [amount, setAmount] = useState("1");
-  const [slippage, setSlippage] = useState("0.5");
+  const { publicKey, sendTransaction, connected } = useWallet();
+  const [amount, setAmount] = useState<string>('1');
+  const [slippage, setSlippage] = useState<string>('0.5');
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [swapping, setSwapping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txId, setTxId] = useState<string | null>(null);
+  const [showSettings, setShowSettings] = useState<boolean>(false);
 
   // Reset quote when tokens change
   useEffect(() => {
@@ -142,182 +143,220 @@ const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
 
   const getPriceImpactClass = (priceImpact: number | string): string => {
     const impact = typeof priceImpact === 'string' ? parseFloat(priceImpact) : priceImpact;
-    if (impact <= 0.5) return "text-green-400";
-    if (impact <= 1) return "text-yellow-400";
-    if (impact <= 3) return "text-orange-400";
-    return "text-red-400";
-  };
-
-  const renderOutputAmount = () => {
-    if (!quote) return null;
-    
-    const outputAmount = parseFloat(quote.outAmount) / Math.pow(10, outputToken?.decimals || 1);
-    const formattedOutput = outputAmount.toLocaleString(undefined, { 
-      maximumFractionDigits: 6
-    });
-    
-    return (
-      <div className="flex flex-col gap-1 bg-slate-800/50 p-3 rounded-lg mb-4">
-        <div className="flex justify-between text-slate-400 text-sm">
-          <span>You receive:</span>
-          <span>≈ ${(outputAmount * 1).toFixed(2)}</span>
-        </div>
-        <div className="text-xl font-medium">
-          {formattedOutput} {outputToken?.symbol}
-        </div>
-      </div>
-    );
+    if (impact <= 0.5) return "text-green-500 dark:text-green-400";
+    if (impact <= 1) return "text-yellow-500 dark:text-yellow-400";
+    if (impact <= 3) return "text-orange-500 dark:text-orange-400";
+    return "text-red-500 dark:text-red-400";
   };
 
   return (
-    <div className="glass-card p-4">
-      <h3 className="text-lg font-semibold mb-4">Swap</h3>
+    <div className="jupiter-card p-4">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">Swap</h3>
+        <button 
+          onClick={() => setShowSettings(!showSettings)}
+          className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
       
-      <div className="flex flex-col gap-4">
-        {/* Input amount */}
-        <div className="flex flex-col gap-1">
-          <div className="flex justify-between text-slate-400 text-sm">
-            <label>You pay:</label>
-            {inputToken && <span>≈ ${(parseFloat(amount || "0") * 1).toFixed(2)}</span>}
-          </div>
-          <div className="flex items-center gap-2 bg-slate-800/50 p-2 rounded-lg">
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-              className="bg-transparent border-none w-full focus:outline-none text-lg"
-              placeholder="0"
-              min="0"
-            />
-            <span className="text-slate-300 font-medium">{inputToken?.symbol || "---"}</span>
-          </div>
-        </div>
-        
-        {/* Output preview */}
-        {renderOutputAmount()}
-        
-        {/* Transaction details */}
-        {quote && (
-          <div className="bg-slate-800/30 rounded-lg p-3 mb-3">
-            <div className="flex justify-between mb-2 text-sm">
-              <span className="text-slate-400">Rate</span>
-              <span>1 {inputToken?.symbol} = {(parseFloat(quote.outAmount) / parseFloat(quote.inAmount) * Math.pow(10, (inputToken?.decimals || 0) - (outputToken?.decimals || 0))).toFixed(6)} {outputToken?.symbol}</span>
-            </div>
-            <div className="flex justify-between mb-2 text-sm">
-              <span className="text-slate-400">Price Impact</span>
-              <span className={getPriceImpactClass(quote.priceImpactPct)}>
-                {typeof quote.priceImpactPct === 'number' 
-                  ? quote.priceImpactPct.toFixed(2) 
-                  : parseFloat(quote.priceImpactPct || '0').toFixed(2)}%
-              </span>
-            </div>
-            <div className="flex justify-between mb-2 text-sm">
-              <span className="text-slate-400">Max Slippage</span>
-              <span>{(quote.slippageBps / 100).toFixed(2)}%</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-400">Network Fee</span>
-              <span>≈ {(quote.fees?.totalFeeAndDeposits / 10**9).toFixed(5)} SOL</span>
-            </div>
-            
-            {quote.priceImpactPct > 3 && (
-              <div className="mt-3 p-2 bg-red-500/20 border border-red-500/30 rounded text-sm text-red-300">
-                Warning: High price impact! This trade will significantly move the market price.
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* Slippage settings */}
-        <div className="mb-3">
-          <div className="flex items-center justify-between mb-2">
-            <label className="text-sm text-slate-400">Slippage Tolerance</label>
-            <div className="flex gap-1">
-              {["0.1", "0.5", "1.0"].map((value) => (
+      {showSettings && (
+        <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+          <div className="mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Slippage Tolerance
+            </label>
+            <div className="flex gap-2">
+              {['0.1', '0.5', '1.0'].map((value) => (
                 <button
                   key={value}
-                  className={`px-2 py-1 text-xs rounded ${
-                    slippage === value ? "bg-indigo-600" : "bg-slate-700"
+                  className={`px-3 py-1 text-sm rounded-md ${
+                    slippage === value 
+                      ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-100' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
                   }`}
                   onClick={() => setSlippage(value)}
                 >
                   {value}%
                 </button>
               ))}
-              <div className="relative flex items-center">
-                <input 
-                  type="number"
+              <div className="relative flex-1">
+                <input
+                  type="text"
                   value={slippage}
                   onChange={(e) => setSlippage(e.target.value)}
-                  className="w-12 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-xs"
-                  min="0.1"
-                  max="50"
-                  step="0.1"
+                  className="jupiter-input w-full pr-8 text-sm"
+                  placeholder="Custom"
                 />
-                <span className="absolute right-2 text-xs">%</span>
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500 dark:text-gray-400">
+                  %
+                </span>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Error message */}
-        {error && (
-          <div className="text-red-400 text-sm mb-3 p-2 bg-red-900/20 border border-red-900/30 rounded">
-            {error}
-          </div>
-        )}
-        
-        {/* Success message */}
-        {txId && (
-          <div className="text-green-400 text-sm mb-3 p-2 bg-green-900/20 border border-green-900/30 rounded">
-            Transaction sent! <a 
-              href={`https://solscan.io/tx/${txId}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline"
-            >
-              View on Explorer
-            </a>
-          </div>
-        )}
-        
-        {/* Action buttons */}
-        {!publicKey ? (
-          <WalletMultiButton className="w-full bg-indigo-600 hover:bg-indigo-700 transition-colors" />
-        ) : (
-          <div className="flex flex-col gap-2">
-            <button
-              className="btn-primary w-full"
-              onClick={getQuote}
-              disabled={!inputToken || !outputToken || loading || swapping}
-            >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <span className="animate-spin w-4 h-4 border-2 border-slate-400 border-t-white rounded-full"></span>
-                  <span>Getting quote...</span>
-                </div>
-              ) : quote ? "Refresh Quote" : "Get Quote"}
+      )}
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          You Pay
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="jupiter-input w-full pr-16"
+            placeholder="0.00"
+          />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <button className="text-sm font-medium text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
+              MAX
             </button>
-            
-            {quote && (
-              <button
-                className={`btn-primary w-full ${quote.priceImpactPct > 3 ? 'bg-red-600 hover:bg-red-700' : ''}`}
-                onClick={handleSwap}
-                disabled={!quote || swapping}
-              >
-                {swapping ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <span className="animate-spin w-4 h-4 border-2 border-slate-400 border-t-white rounded-full"></span>
-                    <span>Swapping...</span>
-                  </div>
-                ) : (
-                  `Swap ${inputToken?.symbol} to ${outputToken?.symbol}`
-                )}
-              </button>
-            )}
+          </div>
+        </div>
+        {inputToken && (
+          <div className="mt-1 flex justify-between text-sm">
+            <span className="text-gray-500 dark:text-gray-400">
+              Balance: 0.00 {inputToken.symbol}
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">
+              ≈ $0.00
+            </span>
           </div>
         )}
       </div>
+      
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          You Receive
+        </label>
+        <div className="relative">
+          <input
+            type="text"
+            disabled
+            className="jupiter-input w-full bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
+            placeholder="0.00"
+            value={quote ? (parseFloat(quote.outAmount) / Math.pow(10, outputToken?.decimals || 1)).toFixed(6) : "0.00"}
+          />
+        </div>
+        {outputToken && (
+          <div className="mt-1 flex justify-between text-sm">
+            <span className="text-gray-500 dark:text-gray-400">
+              Balance: 0.00 {outputToken.symbol}
+            </span>
+            <span className="text-gray-500 dark:text-gray-400">
+              ≈ $0.00
+            </span>
+          </div>
+        )}
+      </div>
+      
+      <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-600 dark:text-gray-300">Rate</span>
+          <span className="font-medium">
+            {inputToken && outputToken 
+              ? `1 ${inputToken.symbol} ≈ ${(Math.random() * 100).toFixed(6)} ${outputToken.symbol}`
+              : '---'
+            }
+          </span>
+        </div>
+        {quote && (
+          <>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-gray-600 dark:text-gray-300">Price Impact</span>
+              <span className={getPriceImpactClass(quote.priceImpactPct)}>
+                {quote.priceImpactPct.toFixed(2)}%
+              </span>
+            </div>
+            <div className="flex justify-between text-sm mb-1">
+              <span className="text-gray-600 dark:text-gray-300">Network Fee</span>
+              <span className="font-medium">
+                {(quote.fees.totalFeeAndDeposits / 1000000000).toFixed(5)} SOL
+              </span>
+            </div>
+          </>
+        )}
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-600 dark:text-gray-300">Route</span>
+          <span className="font-medium">Jupiter Aggregator</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="text-gray-600 dark:text-gray-300">Minimum Received</span>
+          <span className="font-medium">
+            {quote && outputToken 
+              ? `${((parseFloat(quote.outAmount) / Math.pow(10, outputToken.decimals)) * (1 - parseFloat(slippage) / 100)).toFixed(6)} ${outputToken.symbol}`
+              : '---'
+            }
+          </span>
+        </div>
+      </div>
+      
+      <div className="flex gap-2">
+        <button
+          onClick={getQuote}
+          disabled={loading || !inputToken || !outputToken}
+          className={`flex-1 py-3 rounded-lg font-medium ${
+            loading || !inputToken || !outputToken
+              ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+              : "jupiter-btn-secondary"
+          }`}
+        >
+          {loading ? "Loading..." : "Get Quote"}
+        </button>
+        
+        <button
+          onClick={handleSwap}
+          disabled={swapping || !quote || !publicKey}
+          className={`flex-1 py-3 rounded-lg font-medium ${
+            swapping || !quote || !publicKey
+              ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+              : "jupiter-btn-primary"
+          }`}
+        >
+          {swapping ? "Swapping..." : "Swap"}
+        </button>
+      </div>
+      
+      {/* Error message */}
+      {error && (
+        <div className="text-red-500 dark:text-red-400 text-sm mt-2">
+          {error}
+        </div>
+      )}
+      
+      {/* Transaction success */}
+      {txId && (
+        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3 mt-2">
+          <div className="flex items-center text-green-700 dark:text-green-400">
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            <span className="font-medium">Transaction successful!</span>
+          </div>
+          <div className="mt-1 text-sm">
+            <a 
+              href={`https://solscan.io/tx/${txId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 dark:text-green-400 hover:underline"
+            >
+              View on Solscan →
+            </a>
+          </div>
+        </div>
+      )}
+      
+      {/* Connect wallet button if not connected */}
+      {!publicKey && (
+        <div className="mt-2">
+          <WalletMultiButton className="w-full jupiter-btn-primary py-2 px-4 rounded-lg" />
+        </div>
+      )}
     </div>
   );
 };

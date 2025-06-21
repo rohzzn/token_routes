@@ -3,242 +3,184 @@
 @tailwind utilities;
 
 :root {
-  /* Light mode variables */
-  --primary: #6366f1;
-  --primary-light: #818cf8;
-  --primary-dark: #4f46e5;
-  --secondary: #22c55e;
-  --accent: #f59e0b;
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: rgba(255, 255, 255, 0.8);
-  --border: rgba(203, 213, 225, 0.5);
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
+  /* Jupiter brand colors */
+  --jupiter-green-light: 199, 242, 132; /* #C7F284 */
+  --jupiter-green: 86, 217, 138; /* #56D98A */
+  --jupiter-blue: 0, 190, 240; /* #00BEF0 */
   
-  /* Z-index layers */
-  --z-base: 1;
-  --z-dropdown: 99000;
-  --z-dropdown-backdrop: 98000;
-  --z-modal: 99500;
-  --z-tooltip: 99900;
+  /* Light mode colors */
+  --background: 255, 255, 255;
+  --foreground: 33, 33, 33;
+  --card: 255, 255, 255;
+  --card-foreground: 33, 33, 33;
+  --popover: 255, 255, 255;
+  --popover-foreground: 33, 33, 33;
+  --primary: var(--jupiter-green);
+  --primary-foreground: 255, 255, 255;
+  --secondary: 244, 246, 248; /* Light gray */
+  --secondary-foreground: 33, 33, 33;
+  --muted: 240, 240, 240;
+  --muted-foreground: 115, 115, 115;
+  --accent: var(--jupiter-blue);
+  --accent-foreground: 255, 255, 255;
+  --destructive: 239, 68, 68; /* Red-500 */
+  --destructive-foreground: 255, 255, 255;
+  --border: 229, 231, 235; /* Gray-200 */
+  --input: 244, 246, 248;
+  --ring: var(--jupiter-green);
 }
 
 .dark {
-  /* Dark mode variables */
-  --primary: #818cf8;
-  --primary-light: #a5b4fc;
-  --primary-dark: #4f46e5;
-  --secondary: #34d399;
-  --accent: #fbbf24;
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: rgba(30, 41, 59, 0.8);
-  --border: rgba(100, 116, 139, 0.5);
-  --success: #10b981;
-  --warning: #f59e0b;
-  --error: #ef4444;
-  --info: #3b82f6;
-}
-
-html {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card: rgba(255, 255, 255, 0.8);
-  --border: rgba(203, 213, 225, 0.5);
-}
-
-html.dark {
-  --background: #0f172a;
-  --foreground: #f8fafc;
-  --card: rgba(30, 41, 59, 0.8);
-  --border: rgba(100, 116, 139, 0.5);
+  --background: 17, 24, 39; /* Gray-900 */
+  --foreground: 255, 255, 255;
+  --card: 31, 41, 55; /* Gray-800 */
+  --card-foreground: 255, 255, 255;
+  --popover: 31, 41, 55;
+  --popover-foreground: 255, 255, 255;
+  --primary: var(--jupiter-green);
+  --primary-foreground: 17, 24, 39;
+  --secondary: 51, 65, 85; /* Gray-700 */
+  --secondary-foreground: 255, 255, 255;
+  --muted: 51, 65, 85;
+  --muted-foreground: 156, 163, 175; /* Gray-400 */
+  --accent: var(--jupiter-blue);
+  --accent-foreground: 255, 255, 255;
+  --destructive: 239, 68, 68;
+  --destructive-foreground: 255, 255, 255;
+  --border: 55, 65, 81; /* Gray-700 */
+  --input: 51, 65, 85;
+  --ring: var(--jupiter-green);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
   font-family: 'Inter', sans-serif;
   min-height: 100vh;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.glass-card {
-  background: var(--card);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+/* Jupiter UI Components */
+.gradient-text {
+  background: linear-gradient(90deg, rgb(var(--jupiter-green)), rgb(var(--jupiter-blue)));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.jupiter-card {
+  background: rgb(var(--card));
+  border: 1px solid rgba(var(--border), 0.8);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.gradient-text {
-  background: linear-gradient(90deg, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Custom button styles */
-.btn-primary {
-  background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+.jupiter-btn-primary {
+  background: linear-gradient(90deg, rgb(var(--jupiter-green)), rgb(var(--jupiter-blue)));
   color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.btn-secondary {
-  background: rgba(100, 116, 139, 0.2);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.btn-secondary:hover {
-  background: rgba(100, 116, 139, 0.3);
-}
-
-.input {
-  background: rgba(var(--background-rgb, 15, 23, 42), 0.1);
-  border: 1px solid var(--border);
-  color: var(--foreground);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  width: 100%;
+  border-radius: 8px;
+  font-weight: 500;
   transition: all 0.2s ease;
 }
 
-.input:focus {
+.jupiter-btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(var(--jupiter-green), 0.25);
+}
+
+.jupiter-btn-secondary {
+  background: rgb(var(--secondary));
+  color: rgb(var(--secondary-foreground));
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.jupiter-btn-secondary:hover {
+  background: rgba(var(--secondary), 0.8);
+}
+
+.jupiter-input {
+  background: rgb(var(--input));
+  border: 1px solid rgba(var(--border), 0.5);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  color: rgb(var(--foreground));
+  transition: all 0.2s ease;
+}
+
+.jupiter-input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  border-color: rgba(var(--jupiter-green), 0.5);
+  box-shadow: 0 0 0 2px rgba(var(--jupiter-green), 0.25);
 }
 
-/* Token list styles */
-.token-list {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  overflow: hidden;
-  max-height: 16rem;
-  overflow-y: auto;
+.jupiter-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
-.token-item {
-  display: flex;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  cursor: pointer;
-  transition: background 0.2s ease;
+.jupiter-tab-active {
+  background: rgb(var(--jupiter-green));
+  color: white;
 }
 
-.token-item:hover {
-  background: rgba(100, 116, 139, 0.2);
+.jupiter-tab-inactive {
+  color: rgb(var(--foreground));
 }
 
-/* Dropdown styles */
-.dropdown-container {
-  position: relative;
+.jupiter-tab-inactive:hover {
+  background: rgb(var(--secondary));
 }
 
-.dropdown-backdrop {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: var(--z-dropdown-backdrop);
+/* Fix token selection cards */
+.token-selector {
+  background: rgb(var(--card));
+  border: 1px solid rgba(var(--border), 0.8);
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
-.dropdown-menu {
-  position: fixed;
-  z-index: var(--z-dropdown);
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 500px;
-  background: var(--background);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  max-height: 80vh;
-  overflow-y: auto;
+/* Fix route visualization panel */
+.route-panel {
+  background: rgb(var(--card));
+  border: 1px solid rgba(var(--border), 0.8);
+  border-radius: 12px;
+  transition: all 0.2s ease;
 }
 
-/* Light mode specific styles */
-html:not(.dark) {
-  .bg-slate-800 {
-    background-color: #e2e8f0 !important;
-  }
-  
-  .bg-slate-800\/50 {
-    background-color: rgba(226, 232, 240, 0.5) !important;
-  }
-  
-  .bg-slate-700 {
-    background-color: #cbd5e1 !important;
-  }
-  
-  .bg-slate-700\/50 {
-    background-color: rgba(203, 213, 225, 0.5) !important;
-  }
-  
-  .border-slate-700 {
-    border-color: #94a3b8 !important;
-  }
-  
-  .border-slate-600 {
-    border-color: #64748b !important;
-  }
-  
-  .text-slate-400 {
-    color: #475569 !important;
-  }
-  
-  .text-slate-300 {
-    color: #334155 !important;
-  }
+.route-card {
+  background: rgb(var(--secondary));
+  border-radius: 8px;
 }
 
-/* Smooth scrollbars */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.2);
+  background: rgb(var(--secondary));
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.5);
-  border-radius: 3px;
+  background: rgba(var(--muted-foreground), 0.5);
+  border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.7);
+  background: rgba(var(--jupiter-green), 0.5);
+}
+
+/* Theme transition */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
