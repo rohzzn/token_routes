@@ -1,10 +1,10 @@
-# 🪐 Jupiter Router Explorer
+# 🪐 Jupiter Router 
 
-Welcome to Jupiter Router Explorer - an advanced visualization and analytics tool for exploring swap routes on Jupiter, Solana's leading liquidity aggregator.
+Welcome to Jupiter Router  - an advanced visualization and analytics tool for exploring swap routes on Jupiter, Solana's leading liquidity aggregator.
 
 ## Overview
 
-Jupiter Router Explorer is a comprehensive tool that helps traders, developers, and liquidity providers visualize, analyze, and optimize token swaps on Solana. By providing deep insights into routing paths, price impact, and execution efficiency, this tool enables users to make better-informed trading decisions.
+Jupiter Router  is a comprehensive tool that helps traders, developers, and liquidity providers visualize, analyze, and optimize token swaps on Solana. By providing deep insights into routing paths, price impact, and execution efficiency, this tool enables users to make better-informed trading decisions.
 
 ## Key Features
 
@@ -54,7 +54,7 @@ npm run dev
 
 ## How It Works
 
-Jupiter Router Explorer leverages Jupiter's Quote API to fetch and visualize optimal routes between tokens. It then presents this data in an intuitive, interactive interface that allows users to:
+Jupiter Router  leverages Jupiter's Quote API to fetch and visualize optimal routes between tokens. It then presents this data in an intuitive, interactive interface that allows users to:
 
 1. Select input and output tokens
 2. View potential routing paths through various liquidity pools

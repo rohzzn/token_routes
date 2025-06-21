@@ -45,7 +45,7 @@ export default function Home() {
               height={32} 
               className="w-8 h-8"
             />
-            <h1 className="font-bold text-xl gradient-text">Jupiter Router Explorer</h1>
+            <h1 className="font-bold text-xl gradient-text">Jupiter Router</h1>
           </div>
           <div className="flex items-center gap-4">
             <a 

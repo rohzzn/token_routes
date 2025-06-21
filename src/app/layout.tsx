@@ -11,6 +11,10 @@ export const metadata: Metadata = {
   keywords: "Jupiter, Solana, DeFi, Swap, Routing, Visualization, Trading, Crypto",
   authors: [{ name: "Jupiter Route Explorer Team" }],
   viewport: "width=device-width, initial-scale=1",
+  icons: {
+    icon: "/branding/jupiter-logo.svg",
+    apple: "/branding/jupiter-logo.svg",
+  },
 };
 
 export default function RootLayout({
@@ -20,6 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark h-full">
+      <head>
+        <link rel="icon" href="/branding/jupiter-logo.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/branding/jupiter-logo.svg" />
+      </head>
       <body className={`${inter.className} h-full`}>
         <AppWalletProvider>{children}</AppWalletProvider>
       </body>
