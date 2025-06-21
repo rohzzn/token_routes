@@ -43,7 +43,7 @@
   --info: #3b82f6;
 }
 
-html.light {
+html {
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: rgba(255, 255, 255, 0.8);
@@ -187,6 +187,41 @@ body {
   overflow: hidden;
   max-height: 80vh;
   overflow-y: auto;
+}
+
+/* Light mode specific styles */
+html:not(.dark) {
+  .bg-slate-800 {
+    background-color: #e2e8f0 !important;
+  }
+  
+  .bg-slate-800\/50 {
+    background-color: rgba(226, 232, 240, 0.5) !important;
+  }
+  
+  .bg-slate-700 {
+    background-color: #cbd5e1 !important;
+  }
+  
+  .bg-slate-700\/50 {
+    background-color: rgba(203, 213, 225, 0.5) !important;
+  }
+  
+  .border-slate-700 {
+    border-color: #94a3b8 !important;
+  }
+  
+  .border-slate-600 {
+    border-color: #64748b !important;
+  }
+  
+  .text-slate-400 {
+    color: #475569 !important;
+  }
+  
+  .text-slate-300 {
+    color: #334155 !important;
+  }
 }
 
 /* Smooth scrollbars */

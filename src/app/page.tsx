@@ -37,7 +37,7 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-4">
             <a 
-              href="https://docs.jup.ag/docs" 
+              href="https://dev.jup.ag/" 
               target="_blank"
               rel="noopener noreferrer"
               className="text-slate-300 hover:text-white transition-colors"

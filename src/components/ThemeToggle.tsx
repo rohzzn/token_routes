@@ -13,22 +13,18 @@ const ThemeToggle = () => {
     if (savedTheme === 'light') {
       setIsDarkMode(false);
       document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
     } else if (savedTheme === 'dark' || prefersDark) {
       setIsDarkMode(true);
       document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
     }
   }, []);
 
   const toggleTheme = () => {
     if (isDarkMode) {
       document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('light');
       localStorage.setItem('theme', 'light');
     } else {
       document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('light');
       localStorage.setItem('theme', 'dark');
     }
     setIsDarkMode(!isDarkMode);

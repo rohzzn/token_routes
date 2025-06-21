@@ -140,10 +140,11 @@ const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
     }
   };
 
-  const getPriceImpactClass = (priceImpact: number): string => {
-    if (priceImpact <= 0.5) return "text-green-400";
-    if (priceImpact <= 1) return "text-yellow-400";
-    if (priceImpact <= 3) return "text-orange-400";
+  const getPriceImpactClass = (priceImpact: number | string): string => {
+    const impact = typeof priceImpact === 'string' ? parseFloat(priceImpact) : priceImpact;
+    if (impact <= 0.5) return "text-green-400";
+    if (impact <= 1) return "text-yellow-400";
+    if (impact <= 3) return "text-orange-400";
     return "text-red-400";
   };
 
@@ -205,7 +206,9 @@ const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
             <div className="flex justify-between mb-2 text-sm">
               <span className="text-slate-400">Price Impact</span>
               <span className={getPriceImpactClass(quote.priceImpactPct)}>
-                {quote.priceImpactPct.toFixed(2)}%
+                {typeof quote.priceImpactPct === 'number' 
+                  ? quote.priceImpactPct.toFixed(2) 
+                  : parseFloat(quote.priceImpactPct || '0').toFixed(2)}%
               </span>
             </div>
             <div className="flex justify-between mb-2 text-sm">
