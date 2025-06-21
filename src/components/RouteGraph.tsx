@@ -38,6 +38,30 @@ type Route = {
   swapMode: string;
 }
 
+type MarketInfo = {
+  id?: string;
+  ammKey?: string;
+  label?: string;
+  inputMint?: string;
+  outputMint?: string;
+  inAmount?: string;
+  outAmount?: string;
+  feeAmount?: string;
+  feeMint?: string;
+};
+
+type JupiterRoute = {
+  amount?: string;
+  inAmount: string;
+  outAmount: string;
+  priceImpactPct: number | string;
+  marketInfos?: MarketInfo[];
+  routePlan?: RoutePlan[];
+  slippageBps?: number;
+  otherAmountThreshold?: string;
+  swapMode?: string;
+};
+
 const routeColors = [
   '#6366f1', // primary indigo
   '#f97316', // orange
@@ -47,30 +71,70 @@ const routeColors = [
 ];
 
 const getProtocolFromLabel = (label: string): string => {
+  if (!label) return "Unknown";
+  
+  // Convert to lowercase for case-insensitive matching
+  const labelLower = label.toLowerCase();
+  
   const protocolMap: Record<string, string> = {
-    'Orca': 'Orca',
-    'Raydium': 'Raydium',
-    'Meteora': 'Meteora',
-    'Cykura': 'Cykura',
-    'Invariant': 'Invariant',
-    'Lifinity': 'Lifinity',
-    'Saber': 'Saber',
-    'Step': 'Step',
-    'Atrix': 'Atrix',
-    'Mercurial': 'Mercurial',
-    'Aldrin': 'Aldrin',
-    'Serum': 'Serum',
-    'Dex': 'Serum',
-    'Crema': 'Crema',
-    'Saros': 'Saros',
-    'Penguin': 'Penguin',
-    'Unknown': 'Unknown',
+    'orca': 'Orca',
+    'raydium': 'Raydium',
+    'meteora': 'Meteora',
+    'cykura': 'Cykura',
+    'invariant': 'Invariant',
+    'lifinity': 'Lifinity',
+    'saber': 'Saber',
+    'step': 'Step',
+    'atrix': 'Atrix',
+    'mercurial': 'Mercurial',
+    'aldrin': 'Aldrin',
+    'serum': 'Serum',
+    'openbook': 'OpenBook',
+    'dex': 'Serum',
+    'crema': 'Crema',
+    'saros': 'Saros',
+    'penguin': 'Penguin',
+    'jupiter': 'Jupiter',
+    'whirlpool': 'Orca Whirlpool',
+    'phoenix': 'Phoenix',
+    'balancer': 'Balancer',
+    'marinade': 'Marinade',
+    'lido': 'Lido',
+    'jito': 'Jito',
+    'drift': 'Drift',
+    'mango': 'Mango',
+    'zeta': 'Zeta',
+    'dlmm': 'DLMM',
+    'symmetric': 'Symmetric',
+    'bonk': 'Bonk',
+    'v2': 'V2',
+    'v3': 'V3',
+    'v4': 'V4',
   };
 
+  // Check for common protocol names in the label
   for (const [key, value] of Object.entries(protocolMap)) {
-    if (label.includes(key)) return value;
+    if (labelLower.includes(key)) {
+      // For V2/V3/V4 suffixes, try to combine with the protocol name
+      if (labelLower.includes('v2') && !key.includes('v2') && value !== 'V2') {
+        return `${value} V2`;
+      }
+      if (labelLower.includes('v3') && !key.includes('v3') && value !== 'V3') {
+        return `${value} V3`;
+      }
+      if (labelLower.includes('v4') && !key.includes('v4') && value !== 'V4') {
+        return `${value} V4`;
+      }
+      return value;
+    }
   }
-  return 'Unknown';
+  
+  // If we can't identify the protocol but have a label, return it as is
+  if (label.trim()) {
+    return label.trim();
+  }
+  
+  return "Unknown";
 };
 
 const formatTokenAmount = (amount: string, decimals: number): string => {
@@ -115,17 +179,56 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
       .then((res) => res.json())
       .then((data) => {
         if (data.routes && data.routes.length > 0) {
-          setRoutes(data.routes);
+          // Process routes to ensure they have routePlan data
+          const processedRoutes = data.routes.map((route: JupiterRoute) => {
+            // If routePlan is empty or null but we have marketInfos, create a routePlan from marketInfos
+            if ((!route.routePlan || route.routePlan.length === 0) && route.marketInfos && route.marketInfos.length > 0) {
+              route.routePlan = route.marketInfos.map((info: MarketInfo) => ({
+                swapInfo: {
+                  ammKey: info.id || info.ammKey || "unknown",
+                  label: info.label || "Unknown AMM",
+                  inputMint: info.inputMint || inputToken.address,
+                  outputMint: info.outputMint || outputToken.address,
+                  inAmount: info.inAmount || route.inAmount,
+                  outAmount: info.outAmount || route.outAmount,
+                  feeAmount: info.feeAmount || "0",
+                  feeMint: info.feeMint || inputToken.address
+                },
+                percent: 100 / (route.marketInfos?.length || 1)
+              }));
+            }
+            return route;
+          });
+          
+          setRoutes(processedRoutes as Route[]);
           setSelectedRouteIndex(0);
-        } else if (data.routePlan) {
+        } else if (data.routePlan || data.marketInfos) {
           // Handle single route response
+          const routePlan = data.routePlan || [];
+          // If routePlan is empty but we have marketInfos, create a routePlan from marketInfos
+          const processedRoutePlan = routePlan.length === 0 && data.marketInfos && data.marketInfos.length > 0 
+            ? data.marketInfos.map((info: MarketInfo) => ({
+                swapInfo: {
+                  ammKey: info.id || info.ammKey || "unknown",
+                  label: info.label || "Unknown AMM",
+                  inputMint: info.inputMint || inputToken.address,
+                  outputMint: info.outputMint || outputToken.address,
+                  inAmount: info.inAmount || data.inAmount,
+                  outAmount: info.outAmount || data.outAmount,
+                  feeAmount: info.feeAmount || "0",
+                  feeMint: info.feeMint || inputToken.address
+                },
+                percent: 100 / data.marketInfos.length
+              }))
+            : routePlan;
+            
           setRoutes([{
             amount: data.amount,
             inAmount: data.inAmount,
             outAmount: data.outAmount,
             priceImpactPct: data.priceImpactPct,
             marketInfos: data.marketInfos || [],
-            routePlan: data.routePlan,
+            routePlan: processedRoutePlan,
             slippageBps: data.slippageBps || 50,
             otherAmountThreshold: data.otherAmountThreshold || '0',
             swapMode: data.swapMode || 'ExactIn'

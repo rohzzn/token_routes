@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect, useState } from "react";
 import {
   ConnectionProvider,
   WalletProvider,
@@ -10,6 +10,20 @@ import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import { clusterApiUrl } from "@solana/web3.js";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+
+// Client-side-only wrapper to avoid hydration errors
+function ClientOnly({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Only render children on the client
+  if (!mounted) return null;
+  
+  return <>{children}</>;
+}
 
 export default function AppWalletProvider({
   children,
@@ -30,7 +44,9 @@ export default function AppWalletProvider({
   return (
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>{children}</WalletModalProvider>
+        <ClientOnly>
+          <WalletModalProvider>{children}</WalletModalProvider>
+        </ClientOnly>
       </WalletProvider>
     </ConnectionProvider>
   );

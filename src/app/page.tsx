@@ -6,7 +6,13 @@ import SwapPanel from "../components/SwapPanel";
 import RouteAnalytics from "../components/RouteAnalytics";
 import ThemeToggle from "../components/ThemeToggle";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import dynamic from "next/dynamic";
+
+// Import wallet button dynamically with no SSR to avoid hydration errors
+const WalletMultiButtonDynamic = dynamic(
+  async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+  { ssr: false }
+);
 
 type TokenInfo = {
   address: string;
@@ -45,7 +51,7 @@ export default function Home() {
               Docs
             </a>
             <ThemeToggle />
-            <WalletMultiButton />
+            <WalletMultiButtonDynamic />
           </div>
         </div>
       </header>
