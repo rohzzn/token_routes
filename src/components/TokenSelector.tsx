@@ -26,6 +26,7 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
   const [selected, setSelected] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const selectedLabelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Handle clicks outside of dropdown
@@ -99,9 +100,10 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
   };
 
   return (
-    <div className="dropdown-container w-full" style={{ zIndex: isOpen ? 'var(--z-dropdown)' : 'var(--z-base)' }} ref={dropdownRef}>
+    <div className="dropdown-container w-full" ref={dropdownRef}>
       <label className="block mb-2 text-sm font-medium">{label}</label>
       <div 
+        ref={selectedLabelRef}
         className="flex items-center gap-2 p-2 border border-slate-700 rounded-lg bg-slate-800/50 dark:bg-slate-800/50 hover:bg-slate-700/50 dark:hover:bg-slate-700/50 cursor-pointer transition-colors"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -126,12 +128,13 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
       {isOpen && <div className="dropdown-backdrop" onClick={() => setIsOpen(false)}></div>}
       
       {isOpen && (
-        <div className="dropdown-menu mt-1" onClick={(e) => e.stopPropagation()}>
-          <div className="p-2">
+        <div className="dropdown-menu" onClick={(e) => e.stopPropagation()}>
+          <div className="p-4 border-b border-slate-700">
+            <h3 className="text-lg font-medium mb-2">Select a token</h3>
             <input
               type="text"
               placeholder="Search by name or address"
-              className="w-full p-2 bg-slate-700 border border-slate-600 rounded text-white"
+              className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
@@ -139,25 +142,28 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
           </div>
           
           {loading && (
-            <div className="text-center py-4 text-slate-400">Loading tokens...</div>
+            <div className="text-center py-8 text-slate-400">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              Loading tokens...
+            </div>
           )}
           
           {!loading && filtered.length === 0 && (
-            <div className="text-center py-4 text-slate-400">No tokens found</div>
+            <div className="text-center py-8 text-slate-400">No tokens found</div>
           )}
           
-          <ul>
+          <ul className="p-2">
             {filtered.map((token) => (
               <li
                 key={token.address}
-                className="flex items-center justify-between p-2 hover:bg-slate-700 cursor-pointer"
+                className="flex items-center justify-between p-3 hover:bg-slate-700/50 rounded-lg cursor-pointer mb-1"
                 onClick={() => handleSelect(token)}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <img 
                     src={token.logoURI} 
                     alt={token.symbol} 
-                    className="w-6 h-6 rounded-full"
+                    className="w-8 h-8 rounded-full"
                     onError={handleImageError}
                   />
                   <div>
@@ -168,7 +174,7 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
                 
                 <button
                   onClick={(e) => toggleFavorite(token.address, e)}
-                  className="p-1 text-slate-400 hover:text-yellow-400"
+                  className="p-2 text-xl text-slate-400 hover:text-yellow-400"
                 >
                   {favorites.includes(token.address) ? '★' : '☆'}
                 </button>
