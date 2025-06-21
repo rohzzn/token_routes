@@ -1,6 +1,7 @@
 "use client";
 // RouteGraph: Visualizes swap routes using react-flow
 import React, { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import type { TokenInfo } from "./TokenSelector";
 
 // Create a simplified version that doesn't use ReactFlow for now
@@ -85,6 +86,7 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
   const [loading, setLoading] = useState(false);
   const [selectedRouteIndex, setSelectedRouteIndex] = useState<number>(0);
   const [showAllRoutes, setShowAllRoutes] = useState<boolean>(false);
+  const [imageFallback, setImageFallback] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!inputToken || !outputToken) {
@@ -144,6 +146,10 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
     if (routes.length === 0) return [];
     return showAllRoutes ? routes : [routes[selectedRouteIndex]];
   }, [routes, selectedRouteIndex, showAllRoutes]);
+
+  const handleImageError = (address: string) => {
+    setImageFallback(prev => ({ ...prev, [address]: true }));
+  };
 
   const renderRouteSelector = () => {
     if (routes.length <= 1) return null;
@@ -211,14 +217,20 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
           <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1">
             {inputToken && (
               <>
-                <img 
-                  src={inputToken.logoURI} 
-                  alt={inputToken.symbol} 
-                  className="w-5 h-5 rounded-full"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons/svg/color/generic.svg";
-                  }}
-                />
+                <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                  <Image 
+                    src={imageFallback[inputToken.address] 
+                      ? "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons/svg/color/generic.svg" 
+                      : inputToken.logoURI
+                    }
+                    alt={inputToken.symbol}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                    onError={() => handleImageError(inputToken.address)}
+                    unoptimized
+                  />
+                </div>
                 <span>{inputToken.symbol}</span>
               </>
             )}
@@ -253,14 +265,20 @@ const RouteGraph: React.FC<RouteGraphProps> = ({ inputToken, outputToken }) => {
           <div className="flex items-center gap-1 bg-slate-800 rounded-lg px-2 py-1">
             {outputToken && (
               <>
-                <img 
-                  src={outputToken.logoURI} 
-                  alt={outputToken.symbol} 
-                  className="w-5 h-5 rounded-full"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons/svg/color/generic.svg";
-                  }}
-                />
+                <div className="relative w-5 h-5 rounded-full overflow-hidden">
+                  <Image 
+                    src={imageFallback[outputToken.address] 
+                      ? "https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons/svg/color/generic.svg" 
+                      : outputToken.logoURI
+                    }
+                    alt={outputToken.symbol}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
+                    onError={() => handleImageError(outputToken.address)}
+                    unoptimized
+                  />
+                </div>
                 <span>{outputToken.symbol}</span>
               </>
             )}

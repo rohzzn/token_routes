@@ -85,8 +85,9 @@ const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
       
       const quoteResponse = await response.json();
       setQuote(quoteResponse);
-    } catch (err: any) {
-      setError(err.message || "Failed to get quote");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to get quote";
+      setError(errorMessage);
       console.error("Error fetching quote:", err);
     } finally {
       setLoading(false);
@@ -130,8 +131,9 @@ const SwapPanel: React.FC<SwapPanelProps> = ({ inputToken, outputToken }) => {
       
       setTxId(txid);
       console.log(`Transaction sent: https://solscan.io/tx/${txid}`);
-    } catch (err: any) {
-      setError(err.message || "Failed to execute swap");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to execute swap";
+      setError(errorMessage);
       console.error("Error during swap:", err);
     } finally {
       setSwapping(false);

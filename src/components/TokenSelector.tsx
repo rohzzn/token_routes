@@ -1,5 +1,6 @@
 // TokenSelector: Autocomplete input for SPL tokens using Jupiter Token API
 import React, { useEffect, useState, useRef } from "react";
+import Image from "next/image";
 
 // Default generic token icon as fallback
 const DEFAULT_TOKEN_ICON = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMTIgMjRDMTguNjI3NCAyNCAyNCAyNCAyNCAxN0MyNCAxMCAyNCA1LjM3MjU4IDE3IDVDMTAgNC42Mjc0MSA0IDEwIDQgMTdDNCAxNyA0IDI0IDEyIDI0WiIgZmlsbD0iI0NDRDJFOSIvPjxwYXRoIGQ9Ik0xMiAyNEMxOC42Mjc0IDI0IDE5IDE4LjYyNzQgMTkgMTJDMTkgNS4zNzI1OCAxOC42Mjc0IDAgMTIgMEM1LjM3MjU4IDAgNSA1LjM3MjU4IDUgMTJDNSAxOC42Mjc0IDUuMzcyNTggMjQgMTIgMjRaIiBmaWxsPSIjODg5RkIwIi8+PC9zdmc+";
@@ -25,6 +26,7 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
   const [filtered, setFiltered] = useState<TokenInfo[]>([]);
   const [selected, setSelected] = useState<TokenInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [imageFallback, setImageFallback] = useState<Record<string, boolean>>({});
   const dropdownRef = useRef<HTMLDivElement>(null);
   const selectedLabelRef = useRef<HTMLDivElement>(null);
 
@@ -95,8 +97,8 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
     onSelect(token);
   };
 
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    e.currentTarget.src = DEFAULT_TOKEN_ICON;
+  const handleImageError = (address: string) => {
+    setImageFallback(prev => ({ ...prev, [address]: true }));
   };
 
   return (
@@ -109,12 +111,17 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
       >
         {selected ? (
           <>
-            <img 
-              src={selected.logoURI} 
-              alt={selected.symbol} 
-              className="w-6 h-6 rounded-full"
-              onError={handleImageError}
-            />
+            <div className="relative w-6 h-6 rounded-full overflow-hidden">
+              <Image 
+                src={imageFallback[selected.address] ? DEFAULT_TOKEN_ICON : selected.logoURI}
+                alt={selected.symbol}
+                width={24}
+                height={24}
+                className="rounded-full"
+                onError={() => handleImageError(selected.address)}
+                unoptimized
+              />
+            </div>
             <div>
               <div className="font-medium">{selected.symbol}</div>
               <div className="text-xs text-slate-400">{selected.name}</div>
@@ -160,12 +167,17 @@ const TokenSelector: React.FC<TokenSelectorProps> = ({ label, onSelect }) => {
                 onClick={() => handleSelect(token)}
               >
                 <div className="flex items-center gap-3">
-                  <img 
-                    src={token.logoURI} 
-                    alt={token.symbol} 
-                    className="w-8 h-8 rounded-full"
-                    onError={handleImageError}
-                  />
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                    <Image 
+                      src={imageFallback[token.address] ? DEFAULT_TOKEN_ICON : token.logoURI}
+                      alt={token.symbol}
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                      onError={() => handleImageError(token.address)}
+                      unoptimized
+                    />
+                  </div>
                   <div>
                     <div className="font-medium">{token.symbol}</div>
                     <div className="text-xs text-slate-400">{token.name}</div>
